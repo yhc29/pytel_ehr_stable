@@ -169,3 +169,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# ignore all files in config other than template.py
+config/*
+!config/template.py
