@@ -118,6 +118,16 @@ class TEL_CDE:
 		doc = self.tel_db["cde"].find_one({"id": id}, {"_id": 0})
 		return doc
 	
+	def get_cde_str_mongo(self, id):
+		doc = self.tel_db["cde"].find_one({"id": id}, {"_id": 0})
+		collection = doc["collection"]
+		field = doc["field"]
+		value = doc["value"]
+		value = str(value)
+		cde_str = collection + "|" + field + "|" + value
+
+		return cde_str
+	
 	def search_cde_mongo(self, value, field= None, collection = None):
 		query = {"value": {"$exists": True}}
 		if value:

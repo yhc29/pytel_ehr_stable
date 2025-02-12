@@ -2,7 +2,7 @@ import pymongo
 import bson
 from datetime import datetime, timedelta, timezone
 import time
-from TEL_CDE import TEL_CDE
+from tel.TEL_CDE import TEL_CDE
 
 class TEL:
 	def __init__(self, mongo_url, db_name):
@@ -79,7 +79,7 @@ class TEL:
 			self.foreign_records[collection][record_primary_key] = record
 
 		cde_record = {}
-		record_doc = {"ptid": ptid, "elements": []}
+		record_doc = {"ptid": ptid, "cde": []}
 		for field in record:
 			value = record[field]
 			if field in time_fields:
@@ -107,7 +107,7 @@ class TEL:
 				cde_collection = collection
 			element = self.tel_cde.add_element(cde_collection, field, value, value_type,is_primary_key)
 			cde_record[field] = element["id"]
-			record_doc["elements"].append(element["id"])
+			record_doc["cde"].append(element["id"])
 
 		# build events
 		event_docs = []
@@ -152,6 +152,36 @@ class TEL:
 			self.events[key] = event
 
 		return event
+	
+	def create_indices(self):
+		print("Creating indices for cde_records")
+		self.tel_db["cde_records"].create_index([("ptid", pymongo.ASCENDING)])
+		self.tel_db["cde_records"].create_index([("cde", pymongo.ASCENDING)])
+
+		# print("Creating indices for event_records")
+		# self.tel_db["event_records"].create_index([("ptid", pymongo.ASCENDING)])
+		# self.tel_db["event_records"].create_index([("event_id", pymongo.ASCENDING)])
+		# self.tel_db["event_records"].create_index([("time", pymongo.ASCENDING)])
+
+
+	def record_query_by_cde(self, cde_id_list, limit = None):
+		# get all records with any of the cde_id in cde_id_list
+		query = {"cde": {"$in": cde_id_list}}
+		if limit:
+			docs = self.tel_db["cde_records"].find(query).limit(limit)
+		else:
+			docs = self.tel_db["cde_records"].find(query)
+
+		results = []
+		for doc in docs:
+			try:
+				ptid = doc["ptid"]
+			except KeyError:
+				ptid = None
+			cde_list = doc["cde"]
+			cde_str_list = [self.tel_cde.get_cde_str_mongo(x) for x in cde_list]
+			results.append({"ptid": ptid, "cde": cde_list, "cde_str": cde_str_list})
+		return results
 
 
 
