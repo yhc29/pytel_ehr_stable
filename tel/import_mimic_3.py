@@ -43,16 +43,16 @@ def import_mimic_3():
   mimic_tables = ["PATIENTS","ADMISSIONS","D_ICD_DIAGNOSES","ICUSTAYS","DIAGNOSES_ICD"]
   mimic_tables = [x.lower() for x in mimic_tables]
   foreign_tables = ["ADMISSIONS","D_ICD_DIAGNOSES"]
-  mimic_tables = [x.lower() for x in mimic_tables]
+  foreign_tables = [x.lower() for x in foreign_tables]
 
   for table in mimic_tables:
     print("Importing table " + table)
     tel_record_docs = []
     tel_event_record_docs = []
     if table in foreign_tables:
-      is_foreign_reocrd = True
+      is_foreign_record = True
     else:
-      is_foreign_reocrd = False
+      is_foreign_record = False
 
     table_config = mimic_3_config[table]
     file_name = table_config["file_name"]
@@ -87,11 +87,11 @@ def import_mimic_3():
           record.pop("subject_id")
         else:
           ptid = None
-        record_doc,event_record_docs = tel.build_tel_record(collection, ptid, record, primary_key, foreign_keys, time_fields, is_foreign_reocrd, event_defs)
+        record_doc,event_record_docs = tel.build_tel_record(collection, ptid, record, primary_key, foreign_keys, time_fields, is_foreign_record, event_defs)
         tel_record_docs.append(record_doc)
         tel_event_record_docs.extend(event_record_docs)
     tel.import_cde_records(tel_record_docs)
-    # tel.import_event_records(tel_event_record_docs)
+    tel.import_event_records(tel_event_record_docs)
 
   tel.create_events_in_mongo()
 

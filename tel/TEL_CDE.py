@@ -84,12 +84,12 @@ class TEL_CDE:
 				max_id = self.cde[id]["id"]
 		self.max_cde_id = max_id
 	
-	def get_max_temporal_id(self):
+	def get_max_temporal_cde_id(self):
 		max_id = 0
 		for id in self.temporal_cde:
 			if self.temporal_cde[id]["id"] > max_id:
 				max_id = self.temporal_cde[id]["id"]
-		self.max_temporal_id = max_id
+		self.max_temporal_cde_id = max_id
 
 	def add_element(self, collection, field, value, value_type,is_primary_key=False):
 		key = collection + "|" + field + "|" + str(value)
@@ -109,8 +109,8 @@ class TEL_CDE:
 		if key in self.temporal_cde:
 			self.temporal_cde[key]["count"] += 1
 		else:
-			self.max_temporal_id += 1
-			self.temporal_cde[key] = {"id": self.max_temporal_id, "collection": collection, "field": field, "type": type, "count": 1}
+			self.max_temporal_cde_id += 1
+			self.temporal_cde[key] = {"id": self.max_temporal_cde_id, "collection": collection, "field": field, "type": type, "count": 1}
 
 		return self.temporal_cde[key]
 	

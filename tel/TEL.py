@@ -64,19 +64,21 @@ class TEL:
 		self.tel_db["event_records"].drop()
 
 	def import_cde_records(self, docs):
-		self.tel_db["cde_records"].insert_many(docs)
+		if len(docs) > 0:
+			self.tel_db["cde_records"].insert_many(docs)
 
 	def import_event_records(self, docs):
-		self.tel_db["event_records"].insert_many(docs)
+		if len(docs) > 0:
+			self.tel_db["event_records"].insert_many(docs)
 
-	def build_tel_record(self, collection, ptid, record, primary_key, foreign_keys, time_fields, is_foreign_reocrd=False, event_defs = []):
-		if is_foreign_reocrd:
+	def build_tel_record(self, collection, ptid, record, primary_key, foreign_keys, time_fields, is_foreign_record=False, event_defs = []):
+		if is_foreign_record:
 			try:
 				self.foreign_records[collection]
 			except KeyError:
 				self.foreign_records[collection] = {}
 			record_primary_key = record[primary_key]
-			self.foreign_records[collection][record_primary_key] = record
+			self.foreign_records[collection][record_primary_key] = {}
 
 		cde_record = {}
 		record_doc = {"ptid": ptid, "cde": []}
@@ -84,7 +86,9 @@ class TEL:
 			value = record[field]
 			if field in time_fields:
 				if value:
-					value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+					if not isinstance(value, datetime):
+						value = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+					record[field] = value
 				else:
 					value = None
 			else:
@@ -108,31 +112,55 @@ class TEL:
 			element = self.tel_cde.add_element(cde_collection, field, value, value_type,is_primary_key)
 			cde_record[field] = element["id"]
 			record_doc["cde"].append(element["id"])
+			if is_foreign_record:
+				if value_type == "datetime":
+					self.foreign_records[collection][record_primary_key][field] = value
+				else:
+					self.foreign_records[collection][record_primary_key][field] = element["id"]
 
 		# build events
 		event_docs = []
-		# for event_def in event_defs:
-		# 	event_fields = event_def["fields"]
-		# 	temporal_collection = event_def["temporal_collection"]
-		# 	temporal_field = event_def["temporal_field"]
-		# 	temporal_type = event_def["temporal_type"]
-		# 	cde_id_list = sorted([cde_record[field] for field in event_fields])
-		# 	if temporal_field and record.get(temporal_field):
-		# 		# temporal event
-		# 		t = record[temporal_field]
-		# 		temporal_cde = self.tel_cde.add_temporal_element(temporal_collection, temporal_field, temporal_type)
-		# 		temporal_cde_id = temporal_cde["id"]
-		# 	else:
-		# 		# non-temporal event
-		# 		t = None
-		# 		temporal_cde_id = None
-		# 	event = self.add_event(cde_id_list, temporal_cde_id)
-		# 	event_id = event["id"]
-		# 	if t:
-		# 		event_doc = {"ptid": ptid, "event_id": event_id, "time": t}
-		# 	else:
-		# 		event_doc = {"ptid": ptid, "event_id": event_id}
-		# 	event_docs.append(event_doc)
+		for event_def in event_defs:
+			event_fields = event_def["fields"]
+			event_foreign_fields = event_def["foreign_fields"]
+			cde_id_list = [cde_record[field] for field in event_fields]
+			for event_foreign_collection in event_foreign_fields:
+				try:
+					_event_foreign_key = event_foreign_fields[event_foreign_collection]["foreign_key"]
+					_event_foreign_fields = event_foreign_fields[event_foreign_collection]["fields"]
+					for field in _event_foreign_fields:
+						_this_cde = self.foreign_records[event_foreign_collection][record[_event_foreign_key]]
+						cde_id_list.append(_this_cde)
+				except KeyError:
+					print(record)
+					print(f"Error: cannot get cde from {event_foreign_collection}")
+
+			temporal_collection = event_def["temporal_collection"]
+			try:
+				temporal_foreign_key = event_def["temporal_foreign_key"]
+			except KeyError:
+				temporal_foreign_key = None
+			temporal_field = event_def["temporal_field"]
+			temporal_type = event_def["temporal_type"]
+			if temporal_field:
+				# temporal event
+				if temporal_foreign_key:
+					t = self.foreign_records[temporal_collection][record[temporal_foreign_key]][temporal_field]
+				else:
+					t = record[temporal_field]
+				temporal_cde = self.tel_cde.add_temporal_element(temporal_collection, temporal_field, temporal_type)
+				temporal_cde_id = temporal_cde["id"]
+			else:
+				# non-temporal event
+				t = None
+				temporal_cde_id = None
+			event = self.add_event(cde_id_list, temporal_cde_id)
+			event_id = event["id"]
+			if t:
+				event_record_doc = {"ptid": ptid, "event_id": event_id, "time": t}
+			else:
+				event_record_doc = {"ptid": ptid, "event_id": event_id}
+			event_docs.append(event_record_doc)
 
 		return record_doc,event_docs
 	
@@ -158,10 +186,10 @@ class TEL:
 		self.tel_db["cde_records"].create_index([("ptid", pymongo.ASCENDING)])
 		self.tel_db["cde_records"].create_index([("cde", pymongo.ASCENDING)])
 
-		# print("Creating indices for event_records")
-		# self.tel_db["event_records"].create_index([("ptid", pymongo.ASCENDING)])
-		# self.tel_db["event_records"].create_index([("event_id", pymongo.ASCENDING)])
-		# self.tel_db["event_records"].create_index([("time", pymongo.ASCENDING)])
+		print("Creating indices for event_records")
+		self.tel_db["event_records"].create_index([("ptid", pymongo.ASCENDING)])
+		self.tel_db["event_records"].create_index([("event_id", pymongo.ASCENDING)])
+		self.tel_db["event_records"].create_index([("time", pymongo.ASCENDING)])
 
 
 	def record_query_by_cde(self, cde_id_list, limit = None):
