@@ -165,8 +165,16 @@ class TEL:
 
 
 	def record_query_by_cde(self, cde_id_list, limit = None):
-		# get all records with any of the cde_id in cde_id_list
-		query = {"cde": {"$in": cde_id_list}}
+		# if cde_id_list is 1-d list:
+		# get all records with all of the cde_id in cde_id_list
+		# if cde_id_list is 2-d list:
+		# get all records with any of the cde_id in each sublist of cde_id_list
+		if len(cde_id_list) == 0:
+			return []
+		if isinstance(cde_id_list[0], list):
+			query = {"$and": [{"cde": {"$in": x}} for x in cde_id_list]}
+		else:
+			query = {"cde": {"$all": cde_id_list}}
 		if limit:
 			docs = self.tel_db["cde_records"].find(query).limit(limit)
 		else:
