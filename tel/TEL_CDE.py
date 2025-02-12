@@ -127,6 +127,14 @@ class TEL_CDE:
 		cde_str = collection + "|" + field + "|" + value
 
 		return cde_str
+	def get_temporal_cde_str_mongo(self, id):
+		doc = self.tel_db["temporal_cde"].find_one({"id": id}, {"_id": 0})
+		collection = doc["collection"]
+		field = doc["field"]
+		type = doc["type"]
+		temporal_cde_str = collection + "|" + field + "|" + type
+
+		return temporal_cde_str
 	
 	def search_cde_mongo(self, value, field= None, collection = None):
 		query = {"value": {"$exists": True}}
@@ -142,6 +150,19 @@ class TEL_CDE:
 			query["collection"] = collection
 
 		docs = self.tel_db["cde"].find(query, {"_id": 0})
+		results = [x for x in docs]
+		results = sorted(results, key = lambda x: x["count"], reverse = True)
+		return results
+	
+	def search_temporal_cde_mongo(self, field, collection = None):
+		query = {"field": {"$exists": True}}
+		if field:
+			pattern =  f".*{field}.*"
+			query["field"] = {"$regex": pattern}
+		if collection:
+			query["collection"] = collection
+
+		docs = self.tel_db["temporal_cde"].find(query, {"_id": 0})
 		results = [x for x in docs]
 		results = sorted(results, key = lambda x: x["count"], reverse = True)
 		return results

@@ -219,5 +219,60 @@ class TEL:
 			results.append({"ptid": ptid, "cde": cde_list, "cde_str": cde_str_list})
 		return results
 
+	def search_event_by_cde(self, cde_id_list, tced_id= None, limit = None):
+		if len(cde_id_list) == 0 and not tced_id:
+			return []
+		if len(cde_id_list) == 0:
+			query = {"tcde": tced_id}
+		elif isinstance(cde_id_list[0], list):
+			and_stmt = [{"cde": {"$in": x}} for x in cde_id_list]
+			if tced_id:
+				and_stmt.append({"tcde": tced_id})
+			query = {"$and": and_stmt}
+		else:
+			query = {"cde": {"$all": cde_id_list}}
+			if tced_id:
+				query["tcde"] = tced_id
+
+		if limit:
+			docs = self.tel_db["events"].find(query).limit(limit)
+		else:
+			docs = self.tel_db["events"].find(query)
+
+		results = []
+		for doc in docs:
+			event_id = doc["id"]
+			cde_list = doc["cde"]
+			cde_str_list = [self.tel_cde.get_cde_str_mongo(x) for x in cde_list]
+			try:
+				tcde = doc["tcde"]
+				tcde_str = self.tel_cde.get_temporal_cde_str_mongo(tcde)
+			except:
+				tcde = None
+				tcde_str = None
+
+			results.append({"id": event_id, "cde": cde_list, "cde_str": cde_str_list, "tcde": tcde, "tcde_str": tcde_str})
+		return results
+	
+	def event_record_query_by_cde(self, event_id_list, limit = None):
+		if len(event_id_list) == 0:
+			return []
+		query = {"event_id": {"$in": event_id_list}}
+		if limit:
+			docs = self.tel_db["event_records"].find(query).limit(limit)
+		else:
+			docs = self.tel_db["event_records"].find(query)
+
+		results = []
+		for doc in docs:
+			try:
+				ptid = doc["ptid"]
+			except KeyError:
+				ptid = None
+			event_id = doc["event_id"]
+			t = doc["time"]
+			results.append({"ptid": ptid, "event_id": event_id, "time": t})
+		return results
+
 
 
