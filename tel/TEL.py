@@ -129,7 +129,7 @@ class TEL:
 					_event_foreign_key = event_foreign_fields[event_foreign_collection]["foreign_key"]
 					_event_foreign_fields = event_foreign_fields[event_foreign_collection]["fields"]
 					for field in _event_foreign_fields:
-						_this_cde = self.foreign_records[event_foreign_collection][record[_event_foreign_key]]
+						_this_cde = self.foreign_records[event_foreign_collection][record[_event_foreign_key]][field]
 						cde_id_list.append(_this_cde)
 				except KeyError:
 					print(record)
@@ -164,8 +164,8 @@ class TEL:
 
 		return record_doc,event_docs
 	
-	def add_event(self, cde__id_list, temporal_cde_id):
-		keys = [str(x) for x in cde__id_list]
+	def add_event(self, cde_id_list, temporal_cde_id):
+		keys = [str(x) for x in cde_id_list]
 		if temporal_cde_id:
 			keys.append(str(temporal_cde_id))
 		else:
@@ -176,7 +176,7 @@ class TEL:
 			event["count"] += 1
 		except KeyError:
 			self.max_event_id += 1
-			event = {"id": self.max_event_id, "cde": cde__id_list, "tcde": temporal_cde_id, "count": 1}
+			event = {"id": self.max_event_id, "cde": cde_id_list, "tcde": temporal_cde_id, "count": 1}
 			self.events[key] = event
 
 		return event
@@ -234,6 +234,7 @@ class TEL:
 			if tced_id:
 				query["tcde"] = tced_id
 
+		# print(query)
 		if limit:
 			docs = self.tel_db["events"].find(query).limit(limit)
 		else:
