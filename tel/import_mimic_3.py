@@ -32,13 +32,12 @@ def load_mimic_3_config():
   
   return convert_to_lowercase(mimic_3_config)
 
+mimic_3_config = load_mimic_3_config()
+mongo_url = config_file.mongo_url
+db_name = config_file.tel_db_name
+tel = TEL(mongo_url, db_name)
+
 def import_mimic_3():
-  mimic_3_config = load_mimic_3_config()
-
-  mongo_url = config_file.mongo_url
-  db_name = config_file.tel_db_name
-  tel = TEL(mongo_url, db_name)
-
   tel.drop_tel_db()
 
   mimic_tables = ["PATIENTS","ADMISSIONS","D_ICD_DIAGNOSES","ICUSTAYS","DIAGNOSES_ICD"]
@@ -94,7 +93,31 @@ def import_mimic_3():
     tel.import_event_records(tel_event_record_docs)
 
   tel.create_events_in_mongo()
+  tel.create_indices()
 
+  # build TEL EFCFCd
+  # load ptid list from event_records
+  ptid_list = tel.get_ptid_list()
+  total_event_count = 0
+  for i, ptid in enumerate(ptid_list):
+    pt_data = []
+    print(f"ptid:{ptid} {i}/{len(ptid_list)}")
+    docs = tel.tel_db["event_records"].find({"ptid": ptid})
+    for doc in docs:
+      try:
+        time = doc["time"]
+      except KeyError:
+        print(doc)
+      pt_data.append((time, doc["event_id"]))
+      total_event_count += 1
+    pt_data = sorted(pt_data, key=lambda x: x[0])
+    tel.import_efcfcd_to_mongo_v4(ptid, pt_data)
+  tel.create_fcs_indices()
+
+  tel.build_eii()
+
+def index_mimic_3():
+  tel.create_indices()
 
 if __name__ == '__main__':
   import_mimic_3()

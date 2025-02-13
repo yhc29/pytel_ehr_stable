@@ -3,6 +3,7 @@ import bson
 from datetime import datetime, timedelta, timezone
 import time
 from tel.TEL_CDE import TEL_CDE
+from tel.EFCFCd import EFCFCd
 
 class TEL:
 	def __init__(self, mongo_url, db_name):
@@ -148,12 +149,15 @@ class TEL:
 					t = self.foreign_records[temporal_collection][record[temporal_foreign_key]][temporal_field]
 				else:
 					t = record[temporal_field]
+				if not t:
+					continue
 				temporal_cde = self.tel_cde.add_temporal_element(temporal_collection, temporal_field, temporal_type)
 				temporal_cde_id = temporal_cde["id"]
 			else:
 				# non-temporal event
 				t = None
 				temporal_cde_id = None
+		
 			event = self.add_event(cde_id_list, temporal_cde_id)
 			event_id = event["id"]
 			if t:
@@ -190,6 +194,11 @@ class TEL:
 		self.tel_db["event_records"].create_index([("ptid", pymongo.ASCENDING)])
 		self.tel_db["event_records"].create_index([("event_id", pymongo.ASCENDING)])
 		self.tel_db["event_records"].create_index([("time", pymongo.ASCENDING)])
+	def create_fcs_indices(self):
+		print("Building index for collection fcs, pt_group, event1")
+		self.tel_db["fcs"].create_index([("pt_group", pymongo.ASCENDING), ("event1", pymongo.ASCENDING)])
+		print("Building index for collection fcs, pt_group, event2")
+		self.tel_db["fcs"].create_index([("pt_group", pymongo.ASCENDING), ("event2", pymongo.ASCENDING)])
 
 
 	def record_query_by_cde(self, cde_id_list, limit = None):
@@ -274,6 +283,60 @@ class TEL:
 			t = doc["time"]
 			results.append({"ptid": ptid, "event_id": event_id, "time": t})
 		return results
+	
+	def get_ptid_list(self):
+		ptid_list = self.tel_db["event_records"].distinct("ptid")
+		return ptid_list
+
+	def import_efcfcd_to_mongo_v4(self, subject, data, pt_group=0):
+		# print(f"subject: {subject}")
+		subject_efcfcd = EFCFCd(subject, data, "datetime")
+		date_list = subject_efcfcd.date_list
+		# import fcs data to mongo
+		docs = []
+		for event in subject_efcfcd.fcs:
+			fc_dates = subject_efcfcd.fcs[event]["fc_dates"]
+			indices = subject_efcfcd.fcs[event]["date_indices"]
+			# event1 docs
+			docs.append({
+				"ptid": subject,
+				"pt_group": pt_group,
+				"event1": event,
+				"indices": indices,
+			})
+			# event2 docs
+			fc_date_diffs = []
+			for i in range(len(fc_dates)):
+				if fc_dates[i]:
+					fc_date_diffs.append(round((fc_dates[i] - date_list[i]).total_seconds(), 3))
+				else:
+					fc_date_diffs.append(None)
+			docs.append({
+				"ptid": subject,
+				"pt_group": pt_group,
+				"event2": event,
+				"fc_date_diffs": fc_date_diffs
+			})
+		self.tel_db["fcs"].insert_many(docs)
+
+	def build_eii(self):
+		print("Building eii")
+		self.tel_db["eii"].drop()
+
+		pt_group_n = 1
+		for pt_group in range(pt_group_n):
+			ap_stmt = [
+				{"$match": {"pt_group": pt_group, "event1": {"$exists": True}}},
+				{"$group": {"_id": "$event1", "ptids": {"$addToSet": "$ptid"}}}
+			]
+			docs = self.tel_db["fcs"].aggregate(ap_stmt, allowDiskUse=True)
+			eii_docs = []
+			for doc in docs:
+				eii_docs.append({"pt_group": pt_group, "event": doc["_id"], "ptids": doc["ptids"]})
+			self.tel_db["eii"].insert_many(eii_docs)
+		# build index for collection eii, pt_group, event
+		print("Building index for collection eii, pt_group, event")
+		self.tel_db["eii"].create_index([("pt_group", pymongo.ASCENDING), ("event", pymongo.ASCENDING)])
 
 
 
