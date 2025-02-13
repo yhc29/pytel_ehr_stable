@@ -2,6 +2,7 @@ import pymongo
 import bson
 from datetime import datetime, timedelta, timezone
 import time
+import csv
 
 import sys
 sys.path.insert(0, '..')
@@ -65,9 +66,9 @@ def import_mimic_3():
       event_defs = []
 
     collection = table.lower()
-    with open(config_file.ehr_data_folder + file_name) as f:
-      lines = f.readlines()
-      header = lines[0].strip().split(",")
+    with open(config_file.ehr_data_folder + file_name, 'r', encoding='utf-8') as f:
+      csv_reader = csv.reader(f)
+      header = next(csv_reader)
       header = [x.lower() for x in header]
       if "subject_id" in header:
         has_ptid = True
@@ -75,9 +76,8 @@ def import_mimic_3():
         has_ptid = False
 
       line_count = 0
-      for line in lines[1:]:
+      for values in csv_reader:
         line_count += 1
-        values = line.strip().split(",")
         record = {}
         for i in range(len(header)):
           record[header[i]] = values[i]
