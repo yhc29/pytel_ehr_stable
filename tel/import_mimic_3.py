@@ -9,6 +9,7 @@ sys.path.insert(0, '..')
 
 import config.ibm as config_file
 from TEL import TEL
+from OMOP import OMOP
 
 # load mimic_3.json as a dictionary
 import json
