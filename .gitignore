@@ -173,4 +173,5 @@ cython_debug/
 # ignore all files in config other than template.py
 config/*
 !config/template.py
+!config/mimic_3.json
 data/*
