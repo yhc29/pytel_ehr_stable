@@ -14,7 +14,7 @@ class OMOP:
       print(f"Folder {omop_folder} does not exist")
       return
 
-    files = ["CONCEPT.CSV", "CONCEPT_ANCESTOR.CSV", "CONCEPT_RELATIONSHIP.CSV", "CONCEPT_SYNONYM.CSV", "CONCEPT_CLASS.CSV", "DOMAIN.CSV", "DRUG_STRENGTH.CSV", "RELATIONSHIP.CSV", "VOCABULARY.CSV"]
+    files = ["CONCEPT.csv", "CONCEPT_ANCESTOR.csv", "CONCEPT_RELATIONSHIP.csv", "CONCEPT_SYNONYM.csv", "CONCEPT_CLASS.csv", "DOMAIN.csv", "DRUG_STRENGTH.csv", "RELATIONSHIP.csv", "VOCABULARY.csv"]
     for file in files:
       # check if the folder contains the required files, all file names are in upper case
       if file not in os.listdir(omop_folder):
