@@ -1,5 +1,6 @@
 import pymongo
 import os
+import time
 
 class OMOP:
   def __init__(self, mongo_url, db_name):
@@ -25,31 +26,41 @@ class OMOP:
 
   
   def import_omop_file(self, file, collection_name):
+    start_time = time.time()
+    # drop the collection
+    self.omop_db[collection_name].drop()
+    print(f"Dropped collection {collection_name}")
+    print(f"Importing file {file} into collection {collection_name}")
     try:
-      # open file and get headers
+      # open csv file with headers
+      import csv
       with open(file, "r") as f:
-        headers = f.readline().strip().split(",")
-        # read the rest of the file
-        data = f.readlines()
+        csv_reader = csv.reader(f)
+        headers = next(csv_reader)
+        # import the data into the collection by batch
+        batch_size = 5000
+        batch_docs = []
+        doc_count = 0
+        collection = self.omop_db[collection_name]
+        for line in csv_reader:
+          record = {}
+          for i in range(len(headers)):
+            record[headers[i]] = line[i]
+          batch_docs.append(record)
+          doc_count += 1
+          if len(batch_docs) >= batch_size:
+            collection.insert_many(batch_docs)
+            batch_docs = []
+        if len(batch_docs) > 0:
+          collection.insert_many(batch_docs)
+        print(f"Imported {doc_count} docs into collection {collection_name}")
+
     except:
       print(f"Error reading file {file}")
       return False
-    # drop the collection
-    self.omop_db[collection_name].drop()
-    # import the data into the collection by batch
-    batch_size = 5000
-    batch_docs = []
-    doc_count = 0
-    collection = self.omop_db[collection_name]
-    for line in data:
-      record = dict(zip(headers, line.strip().split(",")))
-      batch_docs.append(record)
-      doc_count += 1
-      if len(batch_docs) >= batch_size:
-        collection.insert_many(batch_docs)
-        batch_docs = []
-    if len(batch_docs) > 0:
-      collection.insert_many(batch_docs)
-    print(f"Imported {doc_count} docs into collection {collection_name}")
+    end_time = time.time()
+    # print running time in hours:minutes:seconds
+    print(f"Running time: {time.strftime('%H:%M:%S', time.gmtime(end_time - start_time))}")
+
     return True
       
