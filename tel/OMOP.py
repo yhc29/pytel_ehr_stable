@@ -32,10 +32,10 @@ class OMOP:
     print(f"Dropped collection {collection_name}")
     print(f"Importing file {file} into collection {collection_name}")
     try:
-      # open csv file with headers
+      # open csv file with headers, split by tab
       import csv
-      with open(file, "r") as f:
-        csv_reader = csv.reader(f)
+      with open(file, 'r', encoding='utf-8') as f:
+        csv_reader = csv.reader(f, delimiter='\t')
         headers = next(csv_reader)
         # import the data into the collection by batch
         batch_size = 5000
