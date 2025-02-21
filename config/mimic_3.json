@@ -72,13 +72,6 @@
     "time_fields": [],
     "description": "No explicit time column"
   },
-  "D_CPT": {
-    "file_name": "D_CPT.csv",
-    "primary_key": "CPT_CD",
-    "foreign_keys": {},
-    "time_fields": [],
-    "description": "No explicit time column"
-  },
   "D_ITEMS": {
     "file_name": "D_ITEMS.csv",
     "primary_key": "ITEMID",
