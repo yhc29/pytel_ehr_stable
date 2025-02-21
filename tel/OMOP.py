@@ -63,4 +63,9 @@ class OMOP:
     print(f"Running time: {time.strftime('%H:%M:%S', time.gmtime(end_time - start_time))}")
 
     return True
+  
+  def build_indices(self):
+    # concept collection
+    self.omop_db["concept"].create_index([("concept_id", pymongo.ASCENDING)])
+    self.omop_db["concept"].create_index([("concept_name", pymongo.TEXT)])
       

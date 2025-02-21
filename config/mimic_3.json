@@ -86,6 +86,20 @@
     "time_fields": [],
     "description": "No explicit time column"
   },
+  "D_LABITEMS": {
+    "file_name": "D_LABITEMS.csv",
+    "primary_key": "ITEMID",
+    "foreign_keys": {},
+    "time_fields": [],
+    "description": "No explicit time column"
+  },
+  "CAREGIVERS": {
+    "file_name": "CAREGIVERS.csv",
+    "primary_key": "CGID",
+    "foreign_keys": {},
+    "time_fields": [],
+    "description": "No explicit time column"
+  },
   "ICUSTAYS": {
     "file_name": "ICUSTAYS.csv",
     "primary_key": "ICUSTAY_ID",
@@ -115,11 +129,11 @@
     "time_fields": [],
     "description": "No explicit time column; use ADMITTIME from ADMISSIONS",
     "event_defs":[
-      { "fields":["seq_num"],
+      { "fields":["ICD9_CODE", "seq_num"],
         "foreign_fields":{
           "D_ICD_DIAGNOSES": {
             "foreign_key": "ICD9_CODE",
-            "fields": ["ICD9_CODE", "SHORT_TITLE", "LONG_TITLE"]}
+            "fields": ["SHORT_TITLE", "LONG_TITLE"]}
         },
         "temporal_collection": "ADMISSIONS",
         "temporal_foreign_key": "HADM_ID",
@@ -132,81 +146,231 @@
     "primary_key": "ROW_ID",
     "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS"},
     "time_fields": [],
-    "description": "No explicit time column; use ADMITTIME from ADMISSIONS"
+    "description": "No explicit time column; use ADMITTIME from ADMISSIONS",
+    "event_defs":[
+      { "fields":["ICD9_CODE", "seq_num"],
+      "foreign_fields":{
+        "D_ICD_PROCEDURES": {
+          "foreign_key": "ICD9_CODE",
+          "fields": ["SHORT_TITLE", "LONG_TITLE"]}
+      },
+      "temporal_collection": "ADMISSIONS",
+      "temporal_foreign_key": "HADM_ID",
+      "temporal_field": "DISCHTIME",
+      "temporal_type": "point"}
+    ]
   },
-  "PRESCRIPTIONS": {
-    "file_name": "PRESCRIPTIONS.csv",
+  "PROCEDUREEVENTS_MV": {
+    "file_name": "PROCEDUREEVENTS_MV.csv",
     "primary_key": "ROW_ID",
-    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS"},
-    "time_fields": [
-      "STARTDATE", 
-      "ENDDATE"
-    ],
-    "description": "Medication start and end dates (some may be missing)"
-  },
-  "LABEVENTS": {
-    "file_name": "LABEVENTS.csv",
-    "primary_key": "ROW_ID",
-    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS"},
-    "time_fields": ["CHARTTIME"],
-    "description": "Time when lab test was recorded"
-  },
-  "CHARTEVENTS": {
-    "file_name": "CHARTEVENTS.csv",
-    "primary_key": "ROW_ID",
-    "foreign_keys": ["SUBJECT_ID", "HADM_ID", "ICUSTAY_ID"],
-    "time_fields": [
-      "CHARTTIME", 
-      "STORETIME"
-    ],
-    "description": "Charting time of the event and when it was stored"
-  },
-  "OUTPUTEVENTS": {
-    "file_name": "OUTPUTEVENTS.csv",
-    "primary_key": "ROW_ID",
-    "foreign_keys": ["SUBJECT_ID", "ICUSTAY_ID"],
-    "time_fields": [
-      "CHARTTIME", 
-      "STORETIME"
-    ],
-    "description": "Time when output (e.g., urine) was recorded"
-  },
-  "INPUTEVENTS_MV": {
-    "file_name": "INPUTEVENTS_MV.csv",
-    "primary_key": "ROW_ID",
-    "foreign_keys": ["SUBJECT_ID", "ICUSTAY_ID"],
-    "time_fields": [
-      "STARTTIME", 
-      "ENDTIME"
-    ],
-    "description": "Start and end times for medication/fluids (Metavision system)"
-  },
-  "INPUTEVENTS_CV": {
-    "file_name": "INPUTEVENTS_CV.csv",
-    "primary_key": "ROW_ID",
-    "foreign_keys": ["SUBJECT_ID", "ICUSTAY_ID"],
-    "time_fields": ["CHARTTIME"],
-    "description": "Time when fluids were administered (CareVue system)"
-  },
-  "NOTEEVENTS": {
-    "file_name": "NOTEEVENTS.csv",
-    "primary_key": "ROW_ID",
-    "foreign_keys": ["SUBJECT_ID", "HADM_ID"],
-    "time_fields": ["CHARTTIME"],
-    "description": "Time when a clinical note was written"
-  },
-  "MICROBIOLOGYEVENTS": {
-    "file_name": "MICROBIOLOGYEVENTS.csv",
-    "primary_key": "ROW_ID",
-    "foreign_keys": ["SUBJECT_ID", "HADM_ID"],
-    "time_fields": ["CHARTTIME"],
-    "description": "Time of microbiology test result"
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS", "ICUSTAY_ID": "ICUSTAYS", "ITEMID": "D_ITEMS"},
+    "time_fields": ["STARTTIME", "ENDTIME"],
+    "description": "Time when a procedure was performed",
+    "event_defs":[
+      { "fields":["LOCATION", "ORDERCATEGORYNAME"],
+        "foreign_fields":{
+          "D_ITEMS": {
+            "foreign_key": "ITEMID",
+            "fields": ["LABEL"]}
+        },
+        "temporal_collection": "PROCEDUREEVENTS_MV",
+        "temporal_field": "STARTTIME",
+        "temporal_type": "point"},
+        { "fields":["LOCATION", "ORDERCATEGORYNAME"],
+        "foreign_fields":{
+          "D_ITEMS": {
+            "foreign_key": "ITEMID",
+            "fields": ["LABEL"]}
+        },
+        "temporal_collection": "PROCEDUREEVENTS_MV",
+        "temporal_field": "ENDTIME",
+        "temporal_type": "point"}
+    ]
   },
   "CPTEVENTS": {
     "file_name": "CPTEVENTS.csv",
     "primary_key": "ROW_ID",
-    "foreign_keys": ["SUBJECT_ID", "HADM_ID"],
+    "foreign_keys": { "SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS"},
+    "time_fields": [ "CHARTDATE"],
+    "description": "No explicit time column; use ADMITTIME from ADMISSIONS",
+    "event_defs":[
+      { "fields":["CPT_CD", "SECTIONHEADER", "SUBSECTIONHEADER", "COSTCENTER"],
+        "temporal_collection": "ADMISSIONS",
+        "temporal_foreign_key": "HADM_ID",
+        "temporal_field": "ADMITTIME",
+        "temporal_type": "point"},
+      { "fields":["CPT_CD", "SECTIONHEADER", "SUBSECTIONHEADER", "COSTCENTER"],
+        "temporal_collection": "CPTEVENTS",
+        "temporal_field": "CHARTDATE",
+        "temporal_type": "point"}
+    ]
+  },
+"CHARTEVENTS": {
+    "file_name": "CHARTEVENTS.csv",
+    "primary_key": "ROW_ID",
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS", "ICUSTAY_ID": "ICUSTAYS", "ITEMID": "D_ITEMS", "CGID": "CAREGIVERS"},
+    "time_fields": [
+      "CHARTTIME", 
+      "STORETIME"
+    ],
+    "description": "Charting time of the event and when it was stored",
+    "event_defs":[
+      { "fields":["VALUE", "VALUENUM", "VALUEUOM", "WARNING", "ERROR"],
+        "foreign_fields":{},
+        "temporal_collection": "CHARTEVENTS",
+        "temporal_field": "CHARTTIME",
+        "temporal_type": "point"}
+    ]
+  },
+  "DRGCODES": {
+    "file_name": "DRGCODES.csv",
+    "primary_key": "ROW_ID",
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS"},
     "time_fields": [],
-    "description": "No explicit time column; use ADMITTIME from ADMISSIONS"
+    "description": "No explicit time column; use ADMITTIME from ADMISSIONS",
+    "event_defs":[
+      { "fields":["DRG_TYPE", "DRG_CODE", "DESCRIPTION", "DRG_SEVERITY", "DRG_MORTALITY"],
+        "foreign_fields":{},
+        "temporal_collection": "ADMISSIONS",
+        "temporal_foreign_key": "HADM_ID",
+        "temporal_field": "DISCHTIME",
+        "temporal_type": "point"}
+    ]
+  },
+  "PRESCRIPTIONS": {
+    "file_name": "PRESCRIPTIONS.csv",
+    "primary_key": "ROW_ID",
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS", "ICUSTAY_ID": "ICUSTAYS"},
+    "time_fields": [
+      "STARTDATE", 
+      "ENDDATE"
+    ],
+    "description": "Medication start and end dates (some may be missing)",
+    "event_defs":[
+      { "fields":["NDC","GSN"],
+        "foreign_fields":{},
+        "temporal_collection": "PRESCRIPTIONS",
+        "temporal_field": "STARTDATE",
+        "temporal_type": "point"},
+      { "fields":["NDC","GSN"],
+        "foreign_fields":{},
+        "temporal_collection": "PRESCRIPTIONS",
+        "temporal_field": "ENDDATE",
+        "temporal_type": "point"},
+      { "fields":["DRUG", "DRUG_NAME_POE", "DRUG_NAME_GENERIC", "FORMULARY_DRUG_CD", "PROD_STRENGTH", "DOSE_VAL_RX", "DOSE_UNIT_RX", "FORM_VAL_DISP", "FORM_UNIT_DISP", "ROUTE"],
+        "foreign_fields":{},
+        "temporal_collection": "PRESCRIPTIONS",
+        "temporal_field": "STARTDATE",
+        "temporal_type": "point"},
+      { "fields":["DRUG", "DRUG_NAME_POE", "DRUG_NAME_GENERIC", "FORMULARY_DRUG_CD", "PROD_STRENGTH", "DOSE_VAL_RX", "DOSE_UNIT_RX", "FORM_VAL_DISP", "FORM_UNIT_DISP", "ROUTE"],
+        "foreign_fields":{},
+        "temporal_collection": "PRESCRIPTIONS",
+        "temporal_field": "ENDDATE",
+        "temporal_type": "point"}
+    ]
+  },
+  "INPUTEVENTS_CV": {
+    "file_name": "INPUTEVENTS_CV.csv",
+    "primary_key": "ROW_ID",
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS", "ICUSTAY_ID": "ICUSTAYS", "ITEMID": "D_ITEMS", "CGID": "CAREGIVERS"},
+    "time_fields": ["CHARTTIME"],
+    "description": "Time when fluids were administered (CareVue system)",
+    "event_defs":[
+      { "fields":["AMOUNT", "AMOUNTUOM", "RATE", "RATEUOM"],
+        "foreign_fields":{
+          "D_ITEMS": {
+            "foreign_key": "ITEMID",
+            "fields": ["LABEL"]}
+        },
+        "temporal_collection": "INPUTEVENTS_CV",
+        "temporal_field": "CHARTTIME",
+        "temporal_type": "point"}
+    ]
+  },
+  "INPUTEVENTS_MV": {
+    "file_name": "INPUTEVENTS_MV.csv",
+    "primary_key": "ROW_ID",
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS", "ICUSTAY_ID": "ICUSTAYS", "ITEMID": "D_ITEMS", "CGID": "CAREGIVERS"},
+    "time_fields": [
+      "STARTTIME", 
+      "ENDTIME"
+    ],
+    "description": "Start and end times for medication/fluids (Metavision system)",
+    "event_defs":[
+      { "fields":["AMOUNT", "AMOUNTUOM", "RATE", "RATEUOM", "ORDERCATEGORYNAME", "SECONDARYORDERCATEGORYNAME", "STATUSDESCRIPTION"],
+        "foreign_fields":{
+          "D_ITEMS": {
+            "foreign_key": "ITEMID",
+            "fields": ["LABEL"]}
+        },
+        "temporal_collection": "INPUTEVENTS_MV",
+        "temporal_field": "STARTTIME",
+        "temporal_type": "point"},
+      { "fields":["AMOUNT", "AMOUNTUOM", "RATE", "RATEUOM", "ORDERCATEGORYNAME", "SECONDARYORDERCATEGORYNAME", "STATUSDESCRIPTION"],
+        "foreign_fields":{
+          "D_ITEMS": {
+            "foreign_key": "ITEMID",
+            "fields": ["LABEL"]}
+        },
+        "temporal_collection": "INPUTEVENTS_MV",
+        "temporal_field": "ENDTIME",
+        "temporal_type": "point"}
+    ]
+  },
+  "LABEVENTS": {
+    "file_name": "LABEVENTS.csv",
+    "primary_key": "ROW_ID",
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS", "ITEMID":"D_ITEMS"},
+    "time_fields": ["CHARTTIME"],
+    "description": "Time when lab test was recorded",
+    "event_defs":[
+      { "fields":["VALUE", "VALUENUM", "VALUEUOM", "FLAG"],
+        "foreign_fields":{
+          "D_LABITEMS": {
+            "foreign_key": "ITEMID",
+            "fields": ["LABEL", "LOINC_CODE"]}
+        },
+        "temporal_collection": "LABEVENTS",
+        "temporal_field": "CHARTTIME",
+        "temporal_type": "point"}
+    ]
+  },
+  "MICROBIOLOGYEVENTS": {
+    "file_name": "MICROBIOLOGYEVENTS.csv",
+    "primary_key": "ROW_ID",
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS"},
+    "time_fields": ["CHARTTIME", "CHARTDATE"],
+    "description": "Time of microbiology test result",
+    "event_defs":[
+      { "fields":["SPEC_TYPE_DESC", "ORG_NAME", "ISOLATE_NUM", "AB_NAME", "DILUTION_TEXT", "DILUTION_COMPARISON", "DILUTION_VALUE", "INTERPRETATION"],
+        "temporal_collection": "MICROBIOLOGYEVENTS",
+        "temporal_field": "CHARTTIME",
+        "temporal_type": "point"},
+      { "fields":["SPEC_TYPE_DESC", "ORG_NAME", "ISOLATE_NUM", "AB_NAME", "DILUTION_TEXT", "DILUTION_COMPARISON", "DILUTION_VALUE", "INTERPRETATION"],
+        "temporal_collection": "MICROBIOLOGYEVENTS",
+        "temporal_field": "CHARTDATE",
+        "temporal_type": "point"}
+    ]
+  },
+  "OUTPUTEVENTS": {
+    "file_name": "OUTPUTEVENTS.csv",
+    "primary_key": "ROW_ID",
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS", "ICUSTAY_ID": "ICUSTAYS", "ITEMID": "D_ITEMS"},
+    "time_fields": [
+      "CHARTTIME", 
+      "STORETIME"
+    ],
+    "description": "Time when output (e.g., urine) was recorded",
+    "event_defs":[
+      { "fields":["VALUE", "VALUEUOM"],
+        "foreign_fields":{
+          "D_ITEMS": {
+            "foreign_key": "ITEMID",
+            "fields": ["LABEL"]}
+        },
+        "temporal_collection": "OUTPUTEVENTS",
+        "temporal_field": "CHARTTIME",
+        "temporal_type": "point"}
+    ]
   }
 }

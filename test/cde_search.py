@@ -15,7 +15,7 @@ def test_tel_cde_search():
   db_name = config_file.tel_db_name
   tel_cde = TEL_CDE(mongo_url, db_name)
 
-  term = "f"
+  term = "aspirin"
 
   cdes = tel_cde.fuzzy_search_cde_mongo(term)
   for cde in cdes:

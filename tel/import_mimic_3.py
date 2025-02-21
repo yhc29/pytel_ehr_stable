@@ -41,10 +41,12 @@ tel = TEL(mongo_url, db_name)
 def import_mimic_3():
   tel.drop_tel_db()
 
-  mimic_tables = ["PATIENTS","ADMISSIONS","D_ICD_DIAGNOSES","ICUSTAYS","DIAGNOSES_ICD"]
-  mimic_tables = [x.lower() for x in mimic_tables]
-  foreign_tables = ["ADMISSIONS","D_ICD_DIAGNOSES"]
+  data_tables = ["DIAGNOSES_ICD", "PROCEDURES_ICD", "PROCEDUREEVENTS_MV", "CPTEVENTS", "CHARTEVENTS","DRGCODES", "PRESCRIPTIONS", "INPUTEVENTS_CV", "INPUTEVENTS_MV", "LABEVENTS", "MICROBIOLOGYEVENTS", "OUTPUTEVENTS"]
+  data_tables = [x.lower() for x in data_tables]
+  foreign_tables = ["ADMISSIONS", "ICUSTAYS", "D_ICD_DIAGNOSES", "D_LABITEMS", "D_ITEMS", "D_CPT", "D_ICD_PROCEDURES", "CAREGIVERS"]
   foreign_tables = [x.lower() for x in foreign_tables]
+
+  mimic_tables = ["patients"] + foreign_tables + data_tables
 
   for table in mimic_tables:
     print("Importing table " + table)
