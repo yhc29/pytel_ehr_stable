@@ -188,11 +188,13 @@
     "description": "No explicit time column; use ADMITTIME from ADMISSIONS",
     "event_defs":[
       { "fields":["CPT_CD", "SECTIONHEADER", "SUBSECTIONHEADER", "COSTCENTER"],
+        "foreign_fields":{},
         "temporal_collection": "ADMISSIONS",
         "temporal_foreign_key": "HADM_ID",
         "temporal_field": "ADMITTIME",
         "temporal_type": "point"},
       { "fields":["CPT_CD", "SECTIONHEADER", "SUBSECTIONHEADER", "COSTCENTER"],
+        "foreign_fields":{},
         "temporal_collection": "CPTEVENTS",
         "temporal_field": "CHARTDATE",
         "temporal_type": "point"}
@@ -336,10 +338,12 @@
     "description": "Time of microbiology test result",
     "event_defs":[
       { "fields":["SPEC_TYPE_DESC", "ORG_NAME", "ISOLATE_NUM", "AB_NAME", "DILUTION_TEXT", "DILUTION_COMPARISON", "DILUTION_VALUE", "INTERPRETATION"],
+        "foreign_fields":{},
         "temporal_collection": "MICROBIOLOGYEVENTS",
         "temporal_field": "CHARTTIME",
         "temporal_type": "point"},
       { "fields":["SPEC_TYPE_DESC", "ORG_NAME", "ISOLATE_NUM", "AB_NAME", "DILUTION_TEXT", "DILUTION_COMPARISON", "DILUTION_VALUE", "INTERPRETATION"],
+        "foreign_fields":{},
         "temporal_collection": "MICROBIOLOGYEVENTS",
         "temporal_field": "CHARTDATE",
         "temporal_type": "point"}
