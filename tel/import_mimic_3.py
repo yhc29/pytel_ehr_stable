@@ -43,7 +43,7 @@ def import_mimic_3():
 
   data_tables = ["DIAGNOSES_ICD", "PROCEDURES_ICD", "PROCEDUREEVENTS_MV", "CPTEVENTS", "CHARTEVENTS","DRGCODES", "PRESCRIPTIONS", "INPUTEVENTS_CV", "INPUTEVENTS_MV", "LABEVENTS", "MICROBIOLOGYEVENTS", "OUTPUTEVENTS"]
   data_tables = [x.lower() for x in data_tables]
-  foreign_tables = ["ADMISSIONS", "ICUSTAYS", "D_ICD_DIAGNOSES", "D_LABITEMS", "D_ITEMS", "D_CPT", "D_ICD_PROCEDURES", "CAREGIVERS"]
+  foreign_tables = ["ADMISSIONS", "ICUSTAYS", "D_ICD_DIAGNOSES", "D_LABITEMS", "D_ITEMS", "D_ICD_PROCEDURES", "CAREGIVERS"]
   foreign_tables = [x.lower() for x in foreign_tables]
 
   mimic_tables = ["patients"] + foreign_tables + data_tables
