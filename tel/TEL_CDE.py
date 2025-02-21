@@ -65,7 +65,7 @@ class TEL_CDE:
 		print("Creating index for cde")
 		self.tel_db["cde"].create_index([("id", pymongo.ASCENDING)], unique=True)
 		self.tel_db["cde"].create_index([("value", pymongo.ASCENDING), ("field", pymongo.ASCENDING), ("collection", pymongo.ASCENDING)], unique=True)
-		self.tel_db["cde"].create_index([("str", pymongo.ASCENDING), ("field", pymongo.ASCENDING), ("collection", pymongo.ASCENDING)], unique=True)
+		self.tel_db["cde"].create_index([("str", pymongo.ASCENDING), ("field", pymongo.ASCENDING), ("collection", pymongo.ASCENDING)])
 		print("Creating index for temporal_cde")
 		self.tel_db["temporal_cde"].create_index([("id", pymongo.ASCENDING)], unique=True)
 		self.tel_db["temporal_cde"].create_index([("field", pymongo.ASCENDING), ("collection", pymongo.ASCENDING), ("type", pymongo.ASCENDING)], unique=True)

@@ -94,6 +94,7 @@ def import_mimic_3():
         tel_event_record_docs.extend(event_record_docs)
     tel.import_cde_records(tel_record_docs)
     tel.import_event_records(tel_event_record_docs)
+  print("Imported all tables")
 
   tel.create_events_in_mongo()
   tel.create_indices()
