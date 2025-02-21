@@ -40,7 +40,7 @@ def case1(tel,tel_query_client):
   delta_max = 100*365*24*60*60
   delta_max_op = "lte"
   tel_result = tel_query_client.efcfcd_diamond_v4_1(event_id_list, event_id_list2, delta_max, delta_max_op, False, False)
-  print(tel_result)
+  print(f"tel_result: {len(tel_result)}")
 
 
 def test_tel_temporal_query():

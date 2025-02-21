@@ -3,6 +3,7 @@ import bson
 from datetime import datetime, timedelta, timezone
 import time
 import csv
+import os
 
 import sys
 sys.path.insert(0, '..')
@@ -66,6 +67,21 @@ def import_mimic_3():
       event_defs = table_config["event_defs"]
     except KeyError:
       event_defs = []
+
+    # check if the file path exists, if not check .gz file exists, if yes unzip it
+    file_path = config_file.ehr_data_folder + file_name
+    if not os.path.isfile(file_path):
+      print(f"File {file_path} does not exist")
+      gz_file_path = file_path + ".gz"
+      if os.path.isfile(gz_file_path):
+        print(f"Unzipping file {gz_file_path}")
+        os.system(f"gunzip {gz_file_path}")
+      else:
+        print(f"File {gz_file_path} does not exist")
+        print("Skipping table " + table)
+        continue
+
+      
 
     collection = table.lower()
     with open(config_file.ehr_data_folder + file_name, 'r', encoding='utf-8') as f:
