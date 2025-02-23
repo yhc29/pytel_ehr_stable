@@ -18,10 +18,12 @@ def test_tel_cde_search():
   # tel_cde.create_indices()
 
   term = "aspirin"
+  collection = "prescriptions"
+  field = "drug"
 
   start_time = time.time()
   print("search_cde_mongo")
-  cdes = tel_cde.search_cde_mongo(term)
+  cdes = tel_cde.search_cde_mongo(term,field,collection)
   for cde in cdes:
     cde_id = cde["id"]
     doc = tel_cde.get_cde_mongo(cde_id)
@@ -31,7 +33,7 @@ def test_tel_cde_search():
 
   start_time = time.time()
   print("fuzzy_search_cde_mongo")
-  cdes = tel_cde.fuzzy_search_cde_mongo(term)
+  cdes = tel_cde.fuzzy_search_cde_mongo(term,field=field,collection=collection,limit=None)
   for cde in cdes:
     cde_id = cde["id"]
     doc = tel_cde.get_cde_mongo(cde_id)
