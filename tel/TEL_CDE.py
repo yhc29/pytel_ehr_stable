@@ -64,11 +64,19 @@ class TEL_CDE:
 		# create index
 		print("Creating index for cde")
 		self.tel_db["cde"].create_index([("id", pymongo.ASCENDING)], unique=True)
-		self.tel_db["cde"].create_index([("value", pymongo.ASCENDING), ("field", pymongo.ASCENDING), ("collection", pymongo.ASCENDING)], unique=True)
-		self.tel_db["cde"].create_index([("str", pymongo.ASCENDING), ("field", pymongo.ASCENDING), ("collection", pymongo.ASCENDING)])
+		# self.tel_db["cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("value", pymongo.ASCENDING)])
+		self.tel_db["cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("str", pymongo.TEXT)])
 		print("Creating index for temporal_cde")
 		self.tel_db["temporal_cde"].create_index([("id", pymongo.ASCENDING)], unique=True)
-		self.tel_db["temporal_cde"].create_index([("field", pymongo.ASCENDING), ("collection", pymongo.ASCENDING), ("type", pymongo.ASCENDING)], unique=True)
+		self.tel_db["temporal_cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("type", pymongo.TEXT)], unique=True)
+
+	def create_indices(self):
+		print("Creating index for cde")
+		self.tel_db["cde"].create_index([("id", pymongo.ASCENDING)], unique=True)
+		self.tel_db["cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("str", pymongo.TEXT)])
+		print("Creating index for temporal_cde")
+		self.tel_db["temporal_cde"].create_index([("id", pymongo.ASCENDING)], unique=True)
+		self.tel_db["temporal_cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("type", pymongo.TEXT)], unique=True)
 
 	def update_cde_to_mongo(self):
 		for doc in self.cde.values():
@@ -137,16 +145,14 @@ class TEL_CDE:
 		return temporal_cde_str
 	
 	def search_cde_mongo(self, value, field= None, collection = None):
-		query = {"value": {"$exists": True}}
-		if value:
-			query["value"] = value
+		query = {
+			"collection": {"$exists": True},
+			"field": {"$exists": True},
+			"str": str(value).lower()}
+
 		if field:
 			query["field"] = field
 		if collection:
-			try:
-				query["field"]
-			except KeyError:
-				query["field"] = {"$exists": True}
 			query["collection"] = collection
 
 		docs = self.tel_db["cde"].find(query, {"_id": 0})
@@ -184,16 +190,14 @@ class TEL_CDE:
 		pattern = f".*{search_term}.*"
 		
 		query = {
+			"collection": {"$exists": True},
+			"field": {"$exists": True},
 			"str": {"$regex": pattern}
 		}
 		
 		if field:
 			query["field"] = field
 		if collection:
-			try:
-				query["field"]
-			except KeyError:
-				query["field"] = {"$exists": True}
 			query["collection"] = collection
 
 		# print(query)

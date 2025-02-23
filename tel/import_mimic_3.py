@@ -12,6 +12,8 @@ import config.ibm as config_file
 from TEL import TEL
 from OMOP import OMOP
 
+MONGO_BATCH_SIZE = 5000
+
 # load mimic_3.json as a dictionary
 import json
 def load_mimic_3_config():
@@ -49,10 +51,12 @@ def import_mimic_3():
 
   mimic_tables = ["patients"] + foreign_tables + data_tables
 
+  tel_record_docs = []
+  tel_event_record_docs = []
+  tel_record_count = 0
+  tel_event_record_count = 0
   for table in mimic_tables:
     print("Importing table " + table)
-    tel_record_docs = []
-    tel_event_record_docs = []
     if table in foreign_tables:
       is_foreign_record = True
     else:
@@ -82,7 +86,8 @@ def import_mimic_3():
         continue
 
       
-
+    table_tel_record_count = 0
+    table_tel_event_record_count = 0
     collection = table.lower()
     with open(config_file.ehr_data_folder + file_name, 'r', encoding='utf-8') as f:
       csv_reader = csv.reader(f)
@@ -108,9 +113,26 @@ def import_mimic_3():
         record_doc,event_record_docs = tel.build_tel_record(collection, ptid, record, primary_key, foreign_keys, time_fields, is_foreign_record, event_defs)
         tel_record_docs.append(record_doc)
         tel_event_record_docs.extend(event_record_docs)
-    tel.import_cde_records(tel_record_docs)
-    tel.import_event_records(tel_event_record_docs)
+        tel_record_count += 1
+        table_tel_record_count += 1
+        tel_event_record_count += len(event_record_docs)
+        table_tel_event_record_count += len(event_record_docs)
+        if len(tel_record_docs) >= MONGO_BATCH_SIZE:
+          tel.import_cde_records(tel_record_docs)
+          tel_record_docs = []
+          print(f"Total extracted {tel_record_count} records, {tel_event_record_count} event records")
+        if len(tel_event_record_docs) >= MONGO_BATCH_SIZE:
+          tel.import_event_records(tel_event_record_docs)
+          tel_event_record_docs = []
+    print(f"Table {table} done! Extracted {table_tel_record_count} records, {table_tel_event_record_count} event records")
+    if len(tel_record_docs) > 0:
+      tel.import_cde_records(tel_record_docs)
+      tel_record_docs
+    if len(tel_event_record_docs) > 0:
+      tel.import_event_records(tel_event_record_docs)
+      tel_event_record_docs = []
   print("Imported all tables")
+  print(f"Total extracted {tel_record_count} records, {tel_event_record_count} event records")
 
   tel.create_events_in_mongo()
   tel.create_indices()

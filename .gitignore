@@ -175,3 +175,4 @@ config/*
 !config/template.py
 !config/mimic_3.json
 data/*
+.DS_Store
