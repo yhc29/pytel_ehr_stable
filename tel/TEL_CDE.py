@@ -161,7 +161,9 @@ class TEL_CDE:
 		return results
 	
 	def search_temporal_cde_mongo(self, field, collection = None):
-		query = {"field": {"$exists": True}}
+		query = {
+			"collection": {"$exists": True},
+			"field": {"$exists": True}}
 		if field:
 			pattern =  f".*{field}.*"
 			query["field"] = {"$regex": pattern}
@@ -173,7 +175,7 @@ class TEL_CDE:
 		results = sorted(results, key = lambda x: x["count"], reverse = True)
 		return results
 	
-	def fuzzy_search_cde_mongo(self, search_term, field=None, collection=None, limit=10):
+	def fuzzy_search_cde_mongo(self, search_term, field=None, collection=None, limit=None):
 		"""
 		Performs fuzzy search on CDE using MongoDB's $regex
 		
