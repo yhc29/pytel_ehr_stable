@@ -68,7 +68,7 @@ class TEL_CDE:
 		self.tel_db["cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("str", pymongo.TEXT)])
 		print("Creating index for temporal_cde")
 		self.tel_db["temporal_cde"].create_index([("id", pymongo.ASCENDING)], unique=True)
-		self.tel_db["temporal_cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("type", pymongo.TEXT)], unique=True)
+		self.tel_db["temporal_cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("type", pymongo.TEXT)])
 
 	def create_indices(self):
 		print("Creating index for cde")
@@ -76,7 +76,7 @@ class TEL_CDE:
 		self.tel_db["cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("str", pymongo.TEXT)])
 		print("Creating index for temporal_cde")
 		self.tel_db["temporal_cde"].create_index([("id", pymongo.ASCENDING)], unique=True)
-		self.tel_db["temporal_cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("type", pymongo.TEXT)], unique=True)
+		self.tel_db["temporal_cde"].create_index([("collection", pymongo.TEXT), ("field", pymongo.TEXT), ("type", pymongo.TEXT)])
 
 	def update_cde_to_mongo(self):
 		for doc in self.cde.values():
