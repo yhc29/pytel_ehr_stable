@@ -15,7 +15,7 @@ def test_tel_cde_search():
   db_name = config_file.tel_db_name
   tel_cde = TEL_CDE(mongo_url, db_name)
 
-  # tel_cde.create_indices()
+  tel_cde.create_indices()
 
   term = "aspirin"
   collection = "prescriptions"
