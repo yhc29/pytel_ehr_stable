@@ -17,4 +17,5 @@ omop = OMOP(mongo_url, db_name)
 omop_folder = config_file.omop_data_folder
 
 if __name__ == '__main__':
-  omop.import_omop(omop_folder)
+  # omop.import_omop(omop_folder)
+  omop.build_indices()
