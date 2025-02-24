@@ -84,6 +84,27 @@ class TEL_CDE:
 		for doc in self.temporal_cde.values():
 			self.tel_db["temporal_cde"].update_one({"id": doc["id"]}, {"$set": doc}, upsert=True)
 			
+	def stats(self):
+		# get all collections from mongo
+		docs = self.tel_db["cde"].distinct("collection")
+		collections = [x for x in docs]
+		print(f"collections: {collections}")
+		for collection in collections:
+			print(f"*********************collection: {collection}")
+			# get number of values and total count in each field
+			ap_stmt = [
+				{"$match": {"collection": collection}},
+				{"$group": {"_id": "$field", "record_count": {"$sum": "$count"}, "value_count": {"$sum": 1}}},
+			]
+			docs = self.tel_db["cde"].aggregate(ap_stmt)
+			fields = [x for x in docs]
+			# sort by value_count in ascending order
+			fields = sorted(fields, key = lambda x: x["value_count"])
+			
+			for field in fields:
+				print(f"field: {field['_id']}, value_count: {field['value_count']}, record_count: {field['record_count']}, ratio: {field['value_count']*100/field['record_count']:.2f}%")
+
+
 	
 	def get_max_id(self):
 		max_id = 0

@@ -67,5 +67,5 @@ class OMOP:
   def build_indices(self):
     # concept collection
     self.omop_db["concept"].create_index([("concept_id", pymongo.ASCENDING)])
-    self.omop_db["concept"].create_index([("concept_name", pymongo.TEXT)])
+    self.omop_db["concept"].create_index([("concept_name", pymongo.ASCENDING)])
       

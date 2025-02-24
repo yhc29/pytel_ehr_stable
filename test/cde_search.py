@@ -16,6 +16,7 @@ def test_tel_cde_search():
   tel_cde = TEL_CDE(mongo_url, db_name)
 
   # tel_cde.create_indices()
+  tel_cde.stats()
 
   collection = None
   field = None
