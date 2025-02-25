@@ -11,6 +11,7 @@ from tel.TEL import TEL
 from tel.TEL_Query import TEL_Query
 
 def case1(tel,tel_query_client):
+  start_time = time.time()
   tel_cde = tel.tel_cde
   # event 1, dob in patients
   tcde_list = tel_cde.search_temporal_cde_mongo("dob")
@@ -35,16 +36,24 @@ def case1(tel,tel_query_client):
   # print(cde_id_list)
 
   # search event by cde
-  # event_list2 = tel.search_event_by_cde([cde_id_list2])
-  # event_id_list2 = [x["id"] for x in event_list2]
-  event_id_list2 = [112]
+  event_list2 = tel.search_event_by_cde([cde_id_list2])
+  event_id_list2 = [x["id"] for x in event_list2]
+  # event_id_list2 = [112]
   print(f"event_id_list2: {event_id_list2}")
 
   # query = [event1, event2, 180*delta_unit, "lte", True, False]
-  delta_max = 100*365*24*60*60
+  delta_max = 50*365*24*60*60
   delta_max_op = "lte"
+  # tel_result = set()
+  # for event2_id in event_id_list2:
+  #   # print(f"event2_id: {event2_id}")
+  #   tmp_result = tel_query_client.efcfcd_diamond_v4_1(event_id_list, [event2_id], delta_max, delta_max_op, False, False)
+  #   tel_result = tel_result.union(tmp_result)
   tel_result = tel_query_client.efcfcd_diamond_v4_1(event_id_list, event_id_list2, delta_max, delta_max_op, False, False)
   print(f"tel_result: {len(tel_result)}")
+
+  end_time = time.time()
+  print(f"Running time: {time.strftime('%H:%M:%S', time.gmtime(end_time - start_time))}")
 
 
 def test_tel_temporal_query():
@@ -53,8 +62,8 @@ def test_tel_temporal_query():
   tel = TEL(mongo_url, db_name)
   tel_query_client = TEL_Query(config_file.mongo_url, db_name)
 
-  tel.create_indices()
-  tel_query_client.create_indices()
+  # tel.create_indices()
+  # tel_query_client.create_indices()
 
 
   case1(tel,tel_query_client)

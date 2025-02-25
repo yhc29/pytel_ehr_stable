@@ -76,7 +76,7 @@ class TEL_Query:
 		candidates = self.get_candidates(event1_list, event2_list)
 		# number of candidates is sum of len of values
 		n_candidates = sum([len(x) for x in candidates.values()])
-		print(f"candidates: {n_candidates}")
+		# print(f"candidates: {n_candidates}")
 		result = []
 		delta_min_op = "gt"
 		if cooccurrence:
@@ -152,7 +152,7 @@ class TEL_Query:
 				match_stmt,
 				{"$group": {"_id": None, "ptids": {"$addToSet": "$_id"}}},
 			]
-			docs = self.tel_db["fcs"].aggregate(ap_stmt, allowDiskUse=False)
+			docs = self.tel_db["fcs"].aggregate(ap_stmt, allowDiskUse=True)
 			i = 0
 	
 			# for doc in docs:
