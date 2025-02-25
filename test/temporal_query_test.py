@@ -25,15 +25,19 @@ def case1(tel,tel_query_client):
   #   print(event)
 
   # event 2, diagnosis hypertension
-  cde_list2 = tel_cde.fuzzy_search_cde_mongo("hypertension",limit=None)
+  collection = "d_icd_diagnoses"
+  field = "short_title"
+  # cde_list2 = tel_cde.fuzzy_search_cde_mongo("hypertension", field, collection)
   # for _cde in cde_list:
   #   print(_cde)
-  cde_id_list2 = [x["id"] for x in cde_list2]
+  # cde_id_list2 = [x["id"] for x in cde_list2]
+  cde_id_list2 = [734054]
   # print(cde_id_list)
 
   # search event by cde
-  event_list2 = tel.search_event_by_cde([cde_id_list2])
-  event_id_list2 = [x["id"] for x in event_list2]
+  # event_list2 = tel.search_event_by_cde([cde_id_list2])
+  # event_id_list2 = [x["id"] for x in event_list2]
+  event_id_list2 = [112]
   print(f"event_id_list2: {event_id_list2}")
 
   # query = [event1, event2, 180*delta_unit, "lte", True, False]
@@ -48,6 +52,10 @@ def test_tel_temporal_query():
   db_name = config_file.tel_db_name
   tel = TEL(mongo_url, db_name)
   tel_query_client = TEL_Query(config_file.mongo_url, db_name)
+
+  tel.create_indices()
+  tel_query_client.create_indices()
+
 
   case1(tel,tel_query_client)
 

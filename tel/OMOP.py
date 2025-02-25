@@ -68,4 +68,29 @@ class OMOP:
     # concept collection
     self.omop_db["concept"].create_index([("concept_id", pymongo.ASCENDING)])
     self.omop_db["concept"].create_index([("concept_name", pymongo.ASCENDING)])
-      
+
+  def get_concept_by_id(self, concept_id):
+    doc = self.omop_db["concept"].find_one({"concept_id": concept_id})
+    return doc
+  
+  def concept_name_search(self, concept_name, vocabulary_id=None, fuzzy=False):
+    if fuzzy:
+      query = {"concept_name": {"$regex": concept_name, "$options": "i"}}
+    else:
+      query = {"concept_name": concept_name}
+    if vocabulary_id:
+      query["vocabulary_id"] = vocabulary_id
+    docs = self.omop_db["concept"].find(query)
+
+    return docs
+  
+  def concept_code_search(self, concept_code, vocabulary_id=None, fuzzy=False):
+    if fuzzy:
+      query = {"concept_code": {"$regex": concept_code, "$options": "i"}}
+    else:
+      query = {"concept_code": concept_code}
+    if vocabulary_id:
+      query["vocabulary_id"] = vocabulary_id
+    docs = self.omop_db["concept"].find(query)
+
+    return docs

@@ -194,6 +194,12 @@ class TEL:
 		self.tel_db["event_records"].create_index([("ptid", pymongo.ASCENDING)])
 		self.tel_db["event_records"].create_index([("event_id", pymongo.ASCENDING)])
 		self.tel_db["event_records"].create_index([("time", pymongo.ASCENDING)])
+
+		print("Creating indices for events")
+		self.tel_db["events"].create_index([("id", pymongo.ASCENDING)], unique=True)
+		self.tel_db["events"].create_index([("cde", pymongo.ASCENDING)])
+		self.tel_db["events"].create_index([("tcde", pymongo.ASCENDING)])
+		
 	def create_fcs_indices(self):
 		print("Building index for collection fcs, pt_group, event1")
 		self.tel_db["fcs"].create_index([("pt_group", pymongo.ASCENDING), ("event1", pymongo.ASCENDING)])

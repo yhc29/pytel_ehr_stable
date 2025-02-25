@@ -16,14 +16,18 @@ def test_tel_cde_search():
   tel_cde = TEL_CDE(mongo_url, db_name)
 
   # tel_cde.create_indices()
-  tel_cde.stats()
+  # tel_cde.stats()
 
   collection = None
   field = None
 
-  term = "aspirin"
+  # term = "aspirin"
   # collection = "prescriptions"
   # field = "drug"
+
+  term = "hypertension"
+  collection = "d_icd_diagnoses"
+  field = "long_title"
 
   start_time = time.time()
   print("search_cde_mongo")

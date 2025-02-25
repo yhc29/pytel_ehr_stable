@@ -315,7 +315,7 @@
   "LABEVENTS": {
     "file_name": "LABEVENTS.csv",
     "primary_key": "ROW_ID",
-    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS", "ITEMID":"D_ITEMS"},
+    "foreign_keys": {"SUBJECT_ID": "PATIENTS", "HADM_ID": "ADMISSIONS", "ITEMID":"D_LABITEMS"},
     "time_fields": ["CHARTTIME"],
     "description": "Time when lab test was recorded",
     "event_defs":[

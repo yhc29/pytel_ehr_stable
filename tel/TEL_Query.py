@@ -8,6 +8,17 @@ class TEL_Query:
 		self.client = pymongo.MongoClient(mongo_url)
 		self.tel_db = self.client[db_name]
 
+	def create_indices(self):
+		print("Creating indices")
+
+		# create index for ptid, event1
+		print("Creating index for ptid, event1")
+		self.tel_db["fcs"].create_index([("ptid", pymongo.ASCENDING), ("event1", pymongo.ASCENDING)])
+		# create index for ptid, event2
+		print("Creating index for ptid, event2")
+		self.tel_db["fcs"].create_index([("ptid", pymongo.ASCENDING), ("event2", pymongo.ASCENDING)])
+
+
 	def benchmark_diamond_1(self, event1_list, event2_list, delta_max, delta_max_op="lt",cooccurrence=True,negation=False):
 		# event_id_field_name = "event_id"
 		# data_collection_name = "pt_timeline"
@@ -16,7 +27,7 @@ class TEL_Query:
 		candidates = self.get_candidates(event1_list, event2_list)
 
 		event_id_field_name = "event_id"
-		data_collection_name = "event_reocrds"
+		data_collection_name = "event_records"
 		ptid_field_name = "ptid"
 
 		if cooccurrence:

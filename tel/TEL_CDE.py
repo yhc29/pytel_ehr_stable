@@ -104,6 +104,49 @@ class TEL_CDE:
 			for field in fields:
 				print(f"field: {field['_id']}, value_count: {field['value_count']}, record_count: {field['record_count']}, ratio: {field['value_count']*100/field['record_count']:.2f}%")
 
+	def create_omop_mapping(self, mapping_file_path, omop):
+		mapping_docs = []
+		mapping_doc_count = 0
+		# load json file
+		import json
+		with open(mapping_file_path, 'r') as f:
+			mapping_config = json.load(f)
+			for collection in mapping_config:
+				for field in mapping_config[collection]:
+					mapped_count = 0
+					print(f"create_omop_mapping: collection: {collection}, field: {field}")
+					omop_domain_id = mapping_config[collection][field]["omop_domain_id"]
+					omop_vocabulary_id = mapping_config[collection][field]["omop_vocabulary_id"]
+					mapping_field = mapping_config[collection][field]["mapping_field"]
+
+					cde_docs = self.tel_db["cde"].find({"collection": collection, "field": field})
+					for cde_doc in cde_docs:
+						cde_id = cde_doc["id"]
+						cde_str = cde_doc["str"]
+						# find omop concept_id
+						doc = omop.omop_db["concept"].find_one({"domain_id": omop_domain_id, "vocabulary_id": omop_vocabulary_id, mapping_field: cde_str})
+						if doc:
+							omop_concept_id = doc["concept_id"]
+							mapping_docs.append({"cde_id": cde_id, "omop_concept_id": omop_concept_id})
+							mapped_count += 1
+							mapping_doc_count += 1
+							if len(mapping_docs) >= 5000:
+								self.tel_db["omop_mapping"].insert_many(mapping_docs)
+								mapping_docs = []
+					print(f"mapped_count: {mapped_count}")
+					print(f"total mapping_doc_count: {mapping_doc_count}")
+				if len(mapping_docs) > 0:
+					self.tel_db["omop_mapping"].insert_many(mapping_docs)
+					mapping_docs = []
+		print(f"Import done, total mapping_doc_count: {mapping_doc_count}")
+		# create index
+		print("Creating index for omop_mapping")
+		self.tel_db["omop_mapping"].create_index([("cde_id", pymongo.ASCENDING)])
+		self.tel_db["omop_mapping"].create_index([("omop_concept_id", pymongo.ASCENDING)])
+		print("Creating index for omop_mapping done")
+
+
+
 
 	
 	def get_max_id(self):
