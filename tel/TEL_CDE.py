@@ -111,6 +111,10 @@ class TEL_CDE:
 		# omop.omop_db["concept"].create_index([("domain_id", pymongo.ASCENDING), ("vocabulary_id", pymongo.ASCENDING), ("concept_name", pymongo.ASCENDING)])
 		print("Creating index for omop concept done")
 
+		print("Drop omop_cde_mapping")
+		self.tel_db["omop_cde_mapping"].drop()
+		print("Drop omop_cde_mapping done")
+
 		mapping_docs = []
 		mapping_doc_count = 0
 		cde_scanned_count = 0
