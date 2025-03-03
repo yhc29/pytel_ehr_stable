@@ -42,7 +42,7 @@ def case1(tel,tel_query_client):
   print(f"event_id_list2: {event_id_list2}")
 
   # query = [event1, event2, 180*delta_unit, "lte", True, False]
-  delta_max = 50*365*24*60*60
+  delta_max = 100*365*24*60*60
   delta_max_op = "lte"
   # tel_result = set()
   # for event2_id in event_id_list2:

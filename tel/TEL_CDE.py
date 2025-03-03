@@ -131,19 +131,19 @@ class TEL_CDE:
 							mapped_count += 1
 							mapping_doc_count += 1
 							if len(mapping_docs) >= 5000:
-								self.tel_db["omop_mapping"].insert_many(mapping_docs)
+								self.tel_db["omop_cde_mapping"].insert_many(mapping_docs)
 								mapping_docs = []
 					print(f"mapped_count: {mapped_count}")
 					print(f"total mapping_doc_count: {mapping_doc_count}")
 				if len(mapping_docs) > 0:
-					self.tel_db["omop_mapping"].insert_many(mapping_docs)
+					self.tel_db["omop_cde_mapping"].insert_many(mapping_docs)
 					mapping_docs = []
 		print(f"Import done, total mapping_doc_count: {mapping_doc_count}")
 		# create index
-		print("Creating index for omop_mapping")
-		self.tel_db["omop_mapping"].create_index([("cde_id", pymongo.ASCENDING)])
-		self.tel_db["omop_mapping"].create_index([("omop_concept_id", pymongo.ASCENDING)])
-		print("Creating index for omop_mapping done")
+		print("Creating index for omop_cde_mapping")
+		self.tel_db["omop_cde_mapping"].create_index([("cde_id", pymongo.ASCENDING)])
+		self.tel_db["omop_cde_mapping"].create_index([("omop_concept_id", pymongo.ASCENDING)])
+		print("Creating index for omop_cde_mapping done")
 
 
 
@@ -274,3 +274,4 @@ class TEL_CDE:
 			results = results[:limit]
 		
 		return results
+	
