@@ -113,13 +113,15 @@ class TEL_CDE:
 
 		mapping_docs = []
 		mapping_doc_count = 0
+		cde_scanned_count = 0
 		# load json file
 		import json
 		with open(mapping_file_path, 'r') as f:
 			mapping_config = json.load(f)
 			for collection in mapping_config:
 				for field in mapping_config[collection]:
-					mapped_count = 0
+					mapped_count_this_dield = 0
+					scanned_count_this_field = 0
 					print(f"create_omop_mapping: collection: {collection}, field: {field}")
 					omop_domain_id = mapping_config[collection][field]["omop_domain_id"]
 					omop_vocabulary_id = mapping_config[collection][field]["omop_vocabulary_id"]
@@ -127,6 +129,8 @@ class TEL_CDE:
 
 					cde_docs = self.tel_db["cde"].find({"collection": collection, "field": field})
 					for cde_doc in cde_docs:
+						cde_scanned_count += 1
+						scanned_count_this_field += 1
 						cde_id = cde_doc["id"]
 						cde_str = cde_doc["str"]
 						# find omop concept_id
@@ -134,13 +138,14 @@ class TEL_CDE:
 						if doc:
 							omop_concept_id = doc["concept_id"]
 							mapping_docs.append({"cde_id": cde_id, "omop_concept_id": omop_concept_id})
-							mapped_count += 1
+							mapped_count_this_dield += 1
 							mapping_doc_count += 1
 							if len(mapping_docs) >= 5000:
 								self.tel_db["omop_cde_mapping"].insert_many(mapping_docs)
 								mapping_docs = []
-					print(f"mapped_count: {mapped_count}")
-					print(f"total mapping_doc_count: {mapping_doc_count}")
+								print(f"mapped_count_this_dield: {mapped_count_this_dield}, scanned_count_this_field: {scanned_count_this_field}")
+					print(f"{field} done! mapped_count_this_dield: {mapped_count_this_dield}, scanned_count_this_field: {scanned_count_this_field}")
+					print(f"total mapping_doc_count: {mapping_doc_count}, cde_scanned_count: {cde_scanned_count}")
 				if len(mapping_docs) > 0:
 					self.tel_db["omop_cde_mapping"].insert_many(mapping_docs)
 					mapping_docs = []
