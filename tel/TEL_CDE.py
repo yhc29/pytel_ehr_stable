@@ -148,6 +148,8 @@ class TEL_CDE:
 								self.tel_db["omop_cde_mapping"].insert_many(mapping_docs)
 								mapping_docs = []
 								print(f"mapped_count_this_dield: {mapped_count_this_dield}, scanned_count_this_field: {scanned_count_this_field}")
+						else:
+							print(f"Warning: {cde_str} not found in omop concept")
 					print(f"{field} done! mapped_count_this_dield: {mapped_count_this_dield}, scanned_count_this_field: {scanned_count_this_field}")
 					print(f"total mapping_doc_count: {mapping_doc_count}, cde_scanned_count: {cde_scanned_count}")
 				if len(mapping_docs) > 0:
