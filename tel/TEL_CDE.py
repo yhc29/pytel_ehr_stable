@@ -105,6 +105,12 @@ class TEL_CDE:
 				print(f"field: {field['_id']}, value_count: {field['value_count']}, record_count: {field['record_count']}, ratio: {field['value_count']*100/field['record_count']:.2f}%")
 
 	def create_omop_mapping(self, mapping_file_path, omop):
+		# create index for omop concept collection
+		print("Creating index for omop concept")
+		omop.omop_db["concept"].create_index([("domain_id", pymongo.ASCENDING), ("vocabulary_id", pymongo.ASCENDING), ("concept_code", pymongo.ASCENDING)])
+		# omop.omop_db["concept"].create_index([("domain_id", pymongo.ASCENDING), ("vocabulary_id", pymongo.ASCENDING), ("concept_name", pymongo.ASCENDING)])
+		print("Creating index for omop concept done")
+
 		mapping_docs = []
 		mapping_doc_count = 0
 		# load json file
