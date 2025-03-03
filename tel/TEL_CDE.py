@@ -138,7 +138,10 @@ class TEL_CDE:
 						cde_id = cde_doc["id"]
 						cde_str = cde_doc["str"]
 						if field == "icd9_code":
-							cde_str = format_icd9(cde_str)
+							if collection == "diagnoses_icd":
+								cde_str = format_icd9(cde_str)
+							elif collection == "procedures_icd":
+								cde_str = format_icd9(cde_str, is_procedure=True)
 						# find omop concept_id
 						doc = omop.omop_db["concept"].find_one({"domain_id": omop_domain_id, "vocabulary_id": omop_vocabulary_id, mapping_field: cde_str})
 						if doc:
