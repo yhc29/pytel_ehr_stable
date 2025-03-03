@@ -1,0 +1,37 @@
+{
+  "diagnoses_icd": {
+    "icd9_code": {
+      "omop_domain_id": "Diagnoses",
+      "omop_vocabulary_id": "ICD9CM",
+      "mapping_field": "concept_code"
+    }
+  },
+  "procedures_icd": {
+    "icd9_code": {
+      "omop_domain_id": "Procedures",
+      "omop_vocabulary_id": "ICD9Proc",
+      "mapping_field": "concept_code"
+    }
+  },
+  "cptevents": {
+    "cpt_cd": {
+      "omop_domain_id": "Procedures",
+      "omop_vocabulary_id": "CPT4",
+      "mapping_field": "concept_code"
+    }
+  },
+  "prescriptions": {
+    "ndc": {
+      "omop_domain_id": "Drug",
+      "omop_vocabulary_id": "NDC",
+      "mapping_field": "concept_code"
+    }
+  },
+  "d_labitems": {
+    "loinc_code": {
+      "omop_domain_id": "Measurement",
+      "omop_vocabulary_id": "LOINC",
+      "mapping_field": "concept_code"
+    }
+  }
+}
