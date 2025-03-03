@@ -14,8 +14,9 @@ def test_tel_record_search():
   db_name = config_file.tel_db_name
   tel = TEL(mongo_url, db_name)
 
-  cde_list = [2,413,426]
-  cde_list = [ [2],[413,426]]
+  # cde_list = [2,413,426]
+  # cde_list = [ [2],[413,426]]
+  cde_list = [ 721129]
   results = tel.record_query_by_cde(cde_list)
   result_count = len(results)
   for result in results:

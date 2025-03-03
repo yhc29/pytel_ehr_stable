@@ -137,6 +137,8 @@ class TEL_CDE:
 						scanned_count_this_field += 1
 						cde_id = cde_doc["id"]
 						cde_str = cde_doc["str"]
+						if field == "icd9_code":
+							cde_str = format_icd9(cde_str)
 						# find omop concept_id
 						doc = omop.omop_db["concept"].find_one({"domain_id": omop_domain_id, "vocabulary_id": omop_vocabulary_id, mapping_field: cde_str})
 						if doc:
@@ -292,3 +294,31 @@ class TEL_CDE:
 		
 		return results
 	
+
+def format_icd9(code, is_procedure=False):
+    """
+    Format ICD9 code by adding dots
+    
+    Args:
+        code (str): ICD9 code string
+        is_procedure (bool): True if procedure code, False if diagnosis code
+    
+    Returns:
+        str: Formatted ICD9 code
+    """
+    # Remove existing dots and leading/trailing spaces
+    code = code.replace('.', '').strip()
+    
+    if not code:
+        return code
+        
+    if is_procedure:
+        # Procedure codes: dot after 2nd digit
+        if len(code) > 2:
+            return code[:2] + '.' + code[2:]
+        return code
+    else:
+        # Diagnosis codes: dot after 3rd digit
+        if len(code) > 3:
+            return code[:3] + '.' + code[3:]
+        return code
