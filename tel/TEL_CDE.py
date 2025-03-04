@@ -127,9 +127,6 @@ class TEL_CDE:
 					mapped_count_this_field = 0
 					scanned_count_this_field = 0
 					print(f"create_omop_mapping: collection: {collection}, field: {field}")
-					omop_domain_id = mapping_config[collection][field]["omop_domain_id"]
-					omop_vocabulary_id = mapping_config[collection][field]["omop_vocabulary_id"]
-					mapping_field = mapping_config[collection][field]["mapping_field"]
 					_mappings = mapping_config[collection][field]
 
 					cde_docs = self.tel_db["cde"].find({"collection": collection, "field": field})
