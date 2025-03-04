@@ -124,12 +124,13 @@ class TEL_CDE:
 			mapping_config = json.load(f)
 			for collection in mapping_config:
 				for field in mapping_config[collection]:
-					mapped_count_this_dield = 0
+					mapped_count_this_field = 0
 					scanned_count_this_field = 0
 					print(f"create_omop_mapping: collection: {collection}, field: {field}")
 					omop_domain_id = mapping_config[collection][field]["omop_domain_id"]
 					omop_vocabulary_id = mapping_config[collection][field]["omop_vocabulary_id"]
 					mapping_field = mapping_config[collection][field]["mapping_field"]
+					_mappings = mapping_config[collection][field]
 
 					cde_docs = self.tel_db["cde"].find({"collection": collection, "field": field})
 					for cde_doc in cde_docs:
@@ -143,19 +144,28 @@ class TEL_CDE:
 							elif collection == "procedures_icd":
 								cde_str = format_icd9(cde_str, is_procedure=True)
 						# find omop concept_id
-						doc = omop.omop_db["concept"].find_one({"domain_id": omop_domain_id, "vocabulary_id": omop_vocabulary_id, mapping_field: cde_str})
-						if doc:
+						_or_stmt = []
+						for _mapping_info in _mappings:
+							_omop_domain_id = _mapping_info["omop_domain_id"]
+							_omop_vocabulary_id = _mapping_info["omop_vocabulary_id"]
+							_mapping_field = _mapping_info["mapping_field"]
+							_or_stmt.append({"domain_id": _omop_domain_id, "vocabulary_id": _omop_vocabulary_id, _mapping_field: cde_str})
+
+						docs = omop.omop_db["concept"].find({"$or": _or_stmt})
+						mapped_omop_concepts = [x for x in docs]
+						if len(mapped_omop_concepts) > 0:
+							mapped_count_this_field += 1
+						for doc in mapped_omop_concepts:
 							omop_concept_id = doc["concept_id"]
 							mapping_docs.append({"cde_id": cde_id, "omop_concept_id": omop_concept_id})
-							mapped_count_this_dield += 1
 							mapping_doc_count += 1
 							if len(mapping_docs) >= 5000:
 								self.tel_db["omop_cde_mapping"].insert_many(mapping_docs)
 								mapping_docs = []
-								print(f"mapped_count_this_dield: {mapped_count_this_dield}, scanned_count_this_field: {scanned_count_this_field}")
-						else:
-							print(f"Warning: {cde_str} not found in omop concept")
-					print(f"{field} done! mapped_count_this_dield: {mapped_count_this_dield}, scanned_count_this_field: {scanned_count_this_field}")
+								print(f"mapped_count_this_field: {mapped_count_this_field}, scanned_count_this_field: {scanned_count_this_field}")
+						# else:
+						# 	print(f"Warning: {cde_str} not found in omop concept")
+					print(f"{field} done! mapped_count_this_field: {mapped_count_this_field}, scanned_count_this_field: {scanned_count_this_field}")
 					print(f"total mapping_doc_count: {mapping_doc_count}, cde_scanned_count: {cde_scanned_count}")
 				if len(mapping_docs) > 0:
 					self.tel_db["omop_cde_mapping"].insert_many(mapping_docs)
