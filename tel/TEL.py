@@ -199,7 +199,7 @@ class TEL:
 		self.tel_db["events"].create_index([("id", pymongo.ASCENDING)], unique=True)
 		self.tel_db["events"].create_index([("cde", pymongo.ASCENDING)])
 		self.tel_db["events"].create_index([("tcde", pymongo.ASCENDING)])
-		
+
 	def create_fcs_indices(self):
 		print("Building index for collection fcs, pt_group, event1")
 		self.tel_db["fcs"].create_index([("pt_group", pymongo.ASCENDING), ("event1", pymongo.ASCENDING)])
@@ -269,6 +269,18 @@ class TEL:
 
 			results.append({"id": event_id, "cde": cde_list, "cde_str": cde_str_list, "tcde": tcde, "tcde_str": tcde_str})
 		return results
+	
+	def search_event_by_omop_concept_id(self, omop_concept_id_list, limit = None):
+		if omop_concept_id_list is None or len(omop_concept_id_list) == 0:
+			return []
+		
+		docs = self.tel_db["omop_cde_mapping"].find({"omop_concept_id": {"$in": omop_concept_id_list}})
+		cde_id_list = [doc["cde_id"] for doc in docs]
+
+		event_list = self.search_event_by_cde([cde_id_list])
+		event_id_list = [x["id"] for x in event_list]
+
+		return event_id_list
 	
 	def event_record_query_by_cde(self, event_id_list, limit = None):
 		if len(event_id_list) == 0:

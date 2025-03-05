@@ -7,6 +7,7 @@ import sys
 sys.path.insert(0, '..')
 
 import config.ibm as config_file
+from tel.TEL import TEL
 from tel.TEL_CDE import TEL_CDE
 from tel.OMOP import OMOP
 
@@ -14,6 +15,7 @@ mongo_url = config_file.mongo_url
 db_name = config_file.tel_db_name
 tel_cde = TEL_CDE(mongo_url, db_name)
 omop = OMOP(mongo_url, "omop")
+tel = TEL(mongo_url, db_name)
 
 def build_mapping():
   mapping_file_path = config_file.mapping_file_path
@@ -53,8 +55,27 @@ def save_mapping_to_csv():
     writer.writeheader()
     for row in rows:
       writer.writerow(row)
+
+def get_events_by_omop():
+  # 401.9 Unspecified essential hypertension
+  omop_concept_id = "44821949"
+  # get cdes
+  docs = tel_cde.tel_db["omop_cde_mapping"].find({"omop_concept_id": omop_concept_id})
+  cde_ids = [doc["cde_id"] for doc in docs]
+  print(f"Found {len(cde_ids)} cdes")
+  print(cde_ids)
+
+  # search event by cde
+  event_list = tel.search_event_by_cde([cde_ids])
+  event_id_list = [x["id"] for x in event_list]
+
+  print(f"Found {len(event_id_list)} events")
+  print(event_id_list)
+  
   
 
 if __name__ == "__main__":
   # build_mapping()
-  save_mapping_to_csv()
+  # save_mapping_to_csv()
+
+  get_events_by_omop()
