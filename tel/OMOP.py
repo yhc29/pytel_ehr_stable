@@ -15,21 +15,26 @@ class OMOP:
       print(f"Folder {omop_folder} does not exist")
       return
 
-    files = ["CONCEPT.csv", "CONCEPT_ANCESTOR.csv", "CONCEPT_RELATIONSHIP.csv", "CONCEPT_SYNONYM.csv", "CONCEPT_CLASS.csv", "DOMAIN.csv", "DRUG_STRENGTH.csv", "RELATIONSHIP.csv", "VOCABULARY.csv"]
+    # files = ["CONCEPT.csv", "CONCEPT_ANCESTOR.csv", "CONCEPT_RELATIONSHIP.csv", "CONCEPT_SYNONYM.csv", "CONCEPT_CLASS.csv", "DOMAIN.csv", "DRUG_STRENGTH.csv", "RELATIONSHIP.csv", "VOCABULARY.csv"]
+    files = ["CONCEPT_CPT4.csv"]
     for file in files:
       # check if the folder contains the required files, all file names are in upper case
       if file not in os.listdir(omop_folder):
         print("Missing file: " + file)
         return
       collection_name = file.split(".")[0].lower()
-      self.import_omop_file(os.path.join(omop_folder, file), collection_name)
+      if collection_name == "concept_cpt4":
+        collection_name = "concept"
+      self.import_omop_file(os.path.join(omop_folder, file), collection_name,drop=False)
 
   
-  def import_omop_file(self, file, collection_name):
+  def import_omop_file(self, file, collection_name,drop=True):
     start_time = time.time()
     # drop the collection
-    self.omop_db[collection_name].drop()
-    print(f"Dropped collection {collection_name}")
+    if drop:
+      self.omop_db[collection_name].drop()
+      print(f"Dropped collection {collection_name}")
+
     print(f"Importing file {file} into collection {collection_name}")
     try:
       # open csv file with headers, split by tab
